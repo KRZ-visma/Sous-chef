@@ -1,0 +1,19 @@
+# Workspace rules
+
+- Default to TypeScript; introduce other stacks only after team sign-off.
+- Host the site via GitHub Pages; design assets assuming static delivery.
+- Communicate concisely when using Cursor—clarity beats perfect grammar.
+
+## Delivery cadence (BDD)
+- Follow red → green → refactor loops for every behavior.
+- After each successful loop, commit before starting new work.
+- Keep specs phrased in business language; wire-up details stay in code.
+
+## Collaboration hygiene
+- Branch naming: `feature/<slug>` for each new capability.
+- Commit message pattern: `<domain>/<component>: <intent>` (why it matters).
+- Scope each commit to one finished BDD loop; avoid mixing concerns.
+
+## Documentation
+- Update `docs/tech.md` when tooling, workflow, or feature catalog changes.
+- Log new features in the catalog with status tags (planned/in progress/done).
