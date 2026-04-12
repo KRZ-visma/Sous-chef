@@ -1,0 +1,11 @@
+{
+  "id": "example-lentil-soup",
+  "name": "Example lentil soup",
+  "days": 2,
+  "ingredients": [
+    { "item": "red lentils", "amount": "200", "unit": "g" },
+    { "item": "onion", "amount": "1" },
+    { "item": "vegetable stock" },
+    { "item": "salt and pepper" }
+  ]
+}
