@@ -9,4 +9,15 @@ const repo = 'Sous-chef'
 export default defineConfig({
   plugins: [react()],
   base: process.env.CI === 'true' ? `/${repo}/` : '/',
+  // Listen on all interfaces so Cloud Desktop / port-forwarded previews can reach the dev server.
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+  },
 })

@@ -12,7 +12,7 @@ The web app under `site/` is a **Vite + React + TypeScript** single-page app. St
 cd site && npm install && npm run dev
 ```
 
-Then open the URL Vite prints (typically `http://localhost:5173/`).
+Vite listens on **all interfaces** (`host: true` in `vite.config.ts`), so **Cloud Desktop** port forwarding can reach the app. Open the URL Vite prints (typically `http://localhost:5173/` or the forwarded preview URL shown in the IDE).
 
 ### Lint / Test / Build
 
