@@ -3,28 +3,408 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sous-chef — GitHub Pages</title>
+    <title>Sous-chef — Week plan</title>
     <style>
       :root {
         color-scheme: light dark;
         font-family: system-ui, sans-serif;
         line-height: 1.5;
+        --border: color-mix(in srgb, CanvasText 18%, transparent);
+        --surface: color-mix(in srgb, Canvas 92%, CanvasText 4%);
       }
       body {
-        max-width: 40rem;
+        max-width: min(100%, 96rem);
         margin: 2rem auto;
         padding: 0 1rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+      }
+      .lede {
+        margin-top: 0;
+        color: color-mix(in srgb, CanvasText 72%, Canvas);
+      }
+      .week {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.65rem;
+        overflow-x: auto;
+        padding-bottom: 0.35rem;
+        align-items: stretch;
+        -webkit-overflow-scrolling: touch;
+      }
+      .day-column {
+        flex: 1 1 0;
+        min-width: 10.5rem;
+        max-width: 16rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+      }
+      .day-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .day-column select {
+        width: 100%;
+        font: inherit;
+        padding: 0.4rem 0.5rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: Canvas;
+        color: CanvasText;
+      }
+      .ingredients-wrap {
+        flex: 1;
+        min-height: 4rem;
+      }
+      .recipe-covers {
+        margin: 0 0 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: color-mix(in srgb, CanvasText 72%, Canvas);
+      }
+      .ingredients {
+        margin: 0;
+        padding-left: 1.1rem;
+        font-size: 0.82rem;
+        color: color-mix(in srgb, CanvasText 90%, Canvas);
+      }
+      .ingredients li {
+        margin-bottom: 0.25rem;
+      }
+      .ingredients-empty {
+        margin: 0;
+        font-size: 0.8rem;
+        color: color-mix(in srgb, CanvasText 52%, Canvas);
+        font-style: italic;
+      }
+      .toolbar {
+        margin-top: 1.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .toolbar button {
+        font: inherit;
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: Canvas;
+        color: CanvasText;
+        cursor: pointer;
+      }
+      .toolbar button:hover {
+        filter: brightness(1.05);
+      }
+      .toolbar button:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+      }
+      .status {
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        color: color-mix(in srgb, CanvasText 65%, Canvas);
+        min-height: 1.35em;
+      }
+      .error {
+        color: #c42;
+      }
+      @media (prefers-color-scheme: dark) {
+        .error {
+          color: #f96;
+        }
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>Sous-chef</h1>
-      <p>
-        This is a placeholder static site deployed to
-        <strong>GitHub Pages</strong> when changes land on <code>main</code>.
+      <h1>Week plan</h1>
+      <p class="lede">
+        Pick a recipe for each day. Your plan is saved in this browser only
+        (<code>localStorage</code>).
       </p>
-      <p>Replace this page with the real app or docs build output.</p>
+
+      <div id="app">
+        <p id="loading">Loading recipes…</p>
+      </div>
+
+      <div class="toolbar" id="toolbar" hidden>
+        <button type="button" id="clear-plan">Clear week</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
     </main>
+
+    <script>
+      (function () {
+        const STORAGE_KEY = "sous-chef:week-plan:v1";
+        const DAY_LABELS = [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ];
+
+        /** @type {Record<string, object> | null} */
+        let recipesById = null;
+
+        function loadPlan() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return emptyPlan();
+            const data = JSON.parse(raw);
+            if (!data || !Array.isArray(data.slots)) return emptyPlan();
+            const slots = data.slots.map(function (s) {
+              return s === null || s === "" ? null : String(s);
+            });
+            while (slots.length < 7) slots.push(null);
+            return { slots: slots.slice(0, 7) };
+          } catch {
+            return emptyPlan();
+          }
+        }
+
+        function emptyPlan() {
+          return { slots: new Array(7).fill(null) };
+        }
+
+        function savePlan(plan) {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ slots: plan.slots })
+          );
+        }
+
+        function setStatus(message, isError) {
+          const el = document.getElementById("status");
+          el.textContent = message;
+          el.className = "status" + (isError ? " error" : "");
+        }
+
+        function recipeOptionLabel(recipe) {
+          var d = recipe.days;
+          var suffix =
+            typeof d === "number" && d > 0
+              ? " — " + d + (d === 1 ? " day" : " days")
+              : "";
+          return recipe.name + suffix;
+        }
+
+        function formatIngredientLine(ing) {
+          if (!ing || !ing.item) return "";
+          var bits = [];
+          if (ing.amount) bits.push(String(ing.amount));
+          if (ing.unit) bits.push(ing.unit);
+          var prefix = bits.length ? bits.join(" ") + " " : "";
+          return prefix + ing.item;
+        }
+
+        /** Weekday labels this recipe covers when started on startDayIndex (0–6). */
+        function recipeCalendarDayLabels(recipe, startDayIndex) {
+          if (!recipe) return [];
+          var raw = recipe.days;
+          var span =
+            typeof raw === "number" && raw >= 1
+              ? Math.floor(raw)
+              : 1;
+          var labels = [];
+          for (var o = 0; o < span && startDayIndex + o < 7; o++) {
+            labels.push(DAY_LABELS[startDayIndex + o]);
+          }
+          return labels;
+        }
+
+        function fillDayDetail(wrap, recipe, startDayIndex) {
+          wrap.innerHTML = "";
+          if (!recipe) {
+            return;
+          }
+          var dayLabels = recipeCalendarDayLabels(recipe, startDayIndex);
+          if (dayLabels.length > 0) {
+            var covers = document.createElement("p");
+            covers.className = "recipe-covers";
+            covers.textContent = "Covers: " + dayLabels.join(", ");
+            wrap.appendChild(covers);
+          }
+          var ings = recipe.ingredients;
+          if (!Array.isArray(ings) || ings.length === 0) {
+            var p2 = document.createElement("p");
+            p2.className = "ingredients-empty";
+            p2.textContent = "No ingredients listed.";
+            wrap.appendChild(p2);
+            return;
+          }
+          var ul = document.createElement("ul");
+          ul.className = "ingredients";
+          for (var i = 0; i < ings.length; i++) {
+            var line = formatIngredientLine(ings[i]);
+            if (!line) continue;
+            var li = document.createElement("li");
+            li.textContent = line;
+            ul.appendChild(li);
+          }
+          if (ul.childNodes.length === 0) {
+            var p3 = document.createElement("p");
+            p3.className = "ingredients-empty";
+            p3.textContent = "No ingredients listed.";
+            wrap.appendChild(p3);
+            return;
+          }
+          wrap.appendChild(ul);
+        }
+
+        function renderWeek(recipes) {
+          recipesById = {};
+          for (var i = 0; i < recipes.length; i++) {
+            recipesById[recipes[i].id] = recipes[i];
+          }
+
+          var app = document.getElementById("app");
+          app.innerHTML = "";
+
+          var plan = loadPlan();
+
+          var week = document.createElement("div");
+          week.className = "week";
+          week.setAttribute("role", "list");
+
+          for (var d = 0; d < 7; d++) {
+            (function (dayIndex) {
+              var col = document.createElement("div");
+              col.className = "day-column";
+              col.setAttribute("role", "listitem");
+
+              var label = document.createElement("div");
+              label.className = "day-label";
+              label.textContent = DAY_LABELS[dayIndex];
+
+              var select = document.createElement("select");
+              select.setAttribute("aria-label", DAY_LABELS[dayIndex] + " meal");
+
+              var emptyOpt = document.createElement("option");
+              emptyOpt.value = "";
+              emptyOpt.textContent = "— No recipe —";
+              select.appendChild(emptyOpt);
+
+              for (var r = 0; r < recipes.length; r++) {
+                var rec = recipes[r];
+                var opt = document.createElement("option");
+                opt.value = rec.id;
+                opt.textContent = recipeOptionLabel(rec);
+                select.appendChild(opt);
+              }
+
+              var current = plan.slots[dayIndex];
+              select.value = current && recipesById[current] ? current : "";
+
+              var ingWrap = document.createElement("div");
+              ingWrap.className = "ingredients-wrap";
+              fillDayDetail(
+                ingWrap,
+                select.value ? recipesById[select.value] : null,
+                dayIndex
+              );
+
+              select.addEventListener("change", function () {
+                var pid = loadPlan();
+                pid.slots[dayIndex] = select.value || null;
+                savePlan(pid);
+                fillDayDetail(
+                  ingWrap,
+                  select.value ? recipesById[select.value] : null,
+                  dayIndex
+                );
+                setStatus("Week plan saved on this device.");
+              });
+
+              col.appendChild(label);
+              col.appendChild(select);
+              col.appendChild(ingWrap);
+              week.appendChild(col);
+            })(d);
+          }
+
+          app.appendChild(week);
+          document.getElementById("toolbar").hidden = false;
+          setStatus("Week plan loaded. Changes save automatically.");
+
+          document.getElementById("clear-plan").onclick = function () {
+            savePlan(emptyPlan());
+            renderWeek(recipes);
+            setStatus("Week cleared.");
+          };
+        }
+
+        function showError(message) {
+          var app = document.getElementById("app");
+          app.innerHTML =
+            '<p class="error" role="alert">' +
+            message.replace(/</g, "&lt;").replace(/>/g, "&gt;") +
+            "</p>";
+          setStatus("", false);
+        }
+
+        async function loadRecipes() {
+          var indexRes = await fetch("data/recipes/_index.json");
+          if (!indexRes.ok) {
+            throw new Error("Could not load recipe list.");
+          }
+          var index = await indexRes.json();
+          var ids = index.recipes;
+          if (!Array.isArray(ids) || ids.length === 0) {
+            throw new Error("Recipe list is empty.");
+          }
+
+          var recipes = [];
+          for (var i = 0; i < ids.length; i++) {
+            var id = ids[i];
+            var path = "data/recipes/" + encodeURIComponent(id) + ".json";
+            var res = await fetch(path);
+            if (!res.ok) {
+              throw new Error('Missing recipe file for "' + id + '".');
+            }
+            var recipe = await res.json();
+            if (!recipe || recipe.id !== id) {
+              throw new Error('Recipe id mismatch for "' + id + '".');
+            }
+            recipes.push(recipe);
+          }
+
+          recipes.sort(function (a, b) {
+            return a.name.localeCompare(b.name, undefined, {
+              sensitivity: "base",
+            });
+          });
+
+          return recipes;
+        }
+
+        loadRecipes()
+          .then(function (recipes) {
+            renderWeek(recipes);
+          })
+          .catch(function (err) {
+            console.error(err);
+            showError(
+              err && err.message
+                ? err.message
+                : "Something went wrong loading recipes."
+            );
+          });
+      })();
+    </script>
   </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "id": "simple-pasta-salad",
+  "name": "Simple pasta salad",
+  "days": 1,
+  "ingredients": [
+    { "item": "short pasta", "amount": "250", "unit": "g" },
+    { "item": "cherry tomatoes", "amount": "150", "unit": "g" },
+    { "item": "mozzarella", "amount": "125", "unit": "g" },
+    { "item": "olive oil" },
+    { "item": "basil" }
+  ]
+}
