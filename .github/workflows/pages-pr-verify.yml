@@ -1,0 +1,26 @@
+# Builds the same static site as production and uploads it as a workflow artifact.
+# Reviewers can download the artifact from the Actions run and open index.html locally
+# to verify the site before approving the pull request. This does not publish a public URL.
+
+name: PR — verify static site
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  package-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload site folder as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-pr-${{ github.event.pull_request.number }}
+          path: site/
