@@ -22,6 +22,9 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - Rebase or merge from main frequently to keep the feature branch fresh.
 - **Open a GitHub pull request only when the feature is ready for review**—after the work is complete enough to merge, not after the first commit on the branch. Prefer local commits (or draft PRs only if your team explicitly uses them) until you are ready for human review.
 
+## Recipe data (static)
+- **Location:** **`site/data/recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), deployed with the site. See **`site/data/recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
+
 ## Deployment (GitHub Pages)
 - The static placeholder site lives under **`site/`** and deploys automatically via **`.github/workflows/pages-deploy.yml`** when changes are **merged to `main`**.
 - In the GitHub repo: **Settings → Pages → Build and deployment**, set the source to **GitHub Actions** (not “Deploy from a branch”) so the workflow can publish the artifact.
