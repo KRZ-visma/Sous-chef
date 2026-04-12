@@ -1,6 +1,7 @@
 # Builds the same static site as production and uploads it as a workflow artifact.
-# Reviewers can download the artifact from the Actions run and open index.html locally
-# to verify the site before approving the pull request. This does not publish a public URL.
+# Reviewers can download the artifact from the Actions run and preview the built output
+# (for example `cd site/dist && npx vite preview` from the repo root after extracting).
+# This does not publish a public URL.
 
 name: PR — verify static site
 
@@ -19,8 +20,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload site folder as artifact
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install, lint, and build site
+        run: |
+          cd site
+          npm ci
+          npm run lint
+          npm run build
+
+      - name: Upload built site as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: site-pr-${{ github.event.pull_request.number }}
-          path: site/
+          name: site-dist-pr-${{ github.event.pull_request.number }}
+          path: site/dist/

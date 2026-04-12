@@ -23,14 +23,17 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - **Open a GitHub pull request only when the feature is ready for review**—after the work is complete enough to merge, not after the first commit on the branch. Prefer local commits (or draft PRs only if your team explicitly uses them) until you are ready for human review.
 
 ## Recipe data (static)
-- **Location:** **`site/data/recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), deployed with the site. See **`site/data/recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
+- **Location:** **`site/public/data/recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), copied to the site root at build time and deployed with the app. See **`site/public/data/recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
+
+## Frontend (Vite + React + TypeScript)
+- Source lives under **`site/src/`**. **`npm run dev`** runs the Vite dev server; **`npm run build`** emits static assets to **`site/dist/`** (this is what GitHub Pages publishes).
 
 ## Deployment (GitHub Pages)
-- The static placeholder site lives under **`site/`** and deploys automatically via **`.github/workflows/pages-deploy.yml`** when changes are **merged to `main`**.
+- The app is built from **`site/`** (install, lint, **`npm run build`**) and **`.github/workflows/pages-deploy.yml`** publishes **`site/dist/`** when changes are **merged to `main`**.
 - In the GitHub repo: **Settings → Pages → Build and deployment**, set the source to **GitHub Actions** (not “Deploy from a branch”) so the workflow can publish the artifact.
 
 ## Reviewing changes before merge
-- **PR workflow:** **`.github/workflows/pages-pr-verify.yml`** runs on pull requests targeting `main`, builds nothing extra for now, and uploads the **`site/`** folder as a **workflow artifact**. Reviewers open the PR’s **Checks** tab → the workflow run → **Artifacts**, download the zip, and open `index.html` locally to sanity-check the static output before approving.
+- **PR workflow:** **`.github/workflows/pages-pr-verify.yml`** runs on pull requests targeting `main`, runs **`npm ci`**, **`npm run lint`**, and **`npm run build`** in **`site/`**, and uploads **`site/dist/`** as a **workflow artifact**. Reviewers open the PR’s **Checks** tab → the workflow run → **Artifacts**, download the zip, and preview the built files locally (for example with **`npx vite preview`** pointed at the extracted **`dist/`**) before approving.
 - **Public preview URLs for every PR** are not part of this repo’s default setup. GitHub Pages normally publishes from `main` only. If you need a shareable URL per PR, add a preview host (for example Netlify or Vercel pull-request previews) or a community Pages preview action; document whichever you adopt here.
 
 ## Feature catalog

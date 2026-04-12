@@ -1,0 +1,132 @@
+#root {
+  max-width: min(100%, 96rem);
+  margin: 2rem auto;
+  padding: 0 1rem;
+  text-align: left;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.lede {
+  margin-top: 0;
+  color: color-mix(in srgb, CanvasText 72%, Canvas);
+}
+
+.week {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  align-items: stretch;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-column {
+  flex: 1 1 0;
+  min-width: 10.5rem;
+  max-width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.day-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.day-column select {
+  width: 100%;
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: Canvas;
+  color: CanvasText;
+}
+
+.ingredients-wrap {
+  flex: 1;
+  min-height: 4rem;
+}
+
+.recipe-covers {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: color-mix(in srgb, CanvasText 72%, Canvas);
+}
+
+.ingredients {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, CanvasText 90%, Canvas);
+}
+
+.ingredients li {
+  margin-bottom: 0.25rem;
+}
+
+.ingredients-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, CanvasText 52%, Canvas);
+  font-style: italic;
+}
+
+.toolbar {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.toolbar button {
+  font: inherit;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: Canvas;
+  color: CanvasText;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  filter: brightness(1.05);
+}
+
+.toolbar button:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+.status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, CanvasText 65%, Canvas);
+  min-height: 1.35em;
+}
+
+.error {
+  color: #c42;
+}
+
+@media (prefers-color-scheme: dark) {
+  .error {
+    color: #f96;
+  }
+}

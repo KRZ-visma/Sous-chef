@@ -48,6 +48,10 @@ CodeCoverage/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+# Node / frontend (site/)
+site/node_modules/
+site/dist/
+
 # NUnit
 *.VisualState.xml
 TestResult.xml
