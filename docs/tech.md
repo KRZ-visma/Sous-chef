@@ -20,7 +20,15 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 ## Branching strategy
 - Feature-flow: cut a new `feature/<name>` branch for every upcoming capability.
 - Rebase or merge from main frequently to keep the feature branch fresh.
-- Open pull requests only when the feature branch already reflects a full BDD cycle.
+- **Open a GitHub pull request only when the feature is ready for review**—after the work is complete enough to merge, not after the first commit on the branch. Prefer local commits (or draft PRs only if your team explicitly uses them) until you are ready for human review.
+
+## Deployment (GitHub Pages)
+- The static placeholder site lives under **`site/`** and deploys automatically via **`.github/workflows/pages-deploy.yml`** when changes are **merged to `main`**.
+- In the GitHub repo: **Settings → Pages → Build and deployment**, set the source to **GitHub Actions** (not “Deploy from a branch”) so the workflow can publish the artifact.
+
+## Reviewing changes before merge
+- **PR workflow:** **`.github/workflows/pages-pr-verify.yml`** runs on pull requests targeting `main`, builds nothing extra for now, and uploads the **`site/`** folder as a **workflow artifact**. Reviewers open the PR’s **Checks** tab → the workflow run → **Artifacts**, download the zip, and open `index.html` locally to sanity-check the static output before approving.
+- **Public preview URLs for every PR** are not part of this repo’s default setup. GitHub Pages normally publishes from `main` only. If you need a shareable URL per PR, add a preview host (for example Netlify or Vercel pull-request previews) or a community Pages preview action; document whichever you adopt here.
 
 ## Feature catalog
 - Maintain a living list of released and upcoming features here.
