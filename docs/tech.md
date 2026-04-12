@@ -1,5 +1,7 @@
 # Project Guide
 
+Editor and agent context for this repo is configured under **`.cursor/rules`**. That file should **point here** rather than duplicate stack, workflow, or catalog content. When you edit this guide, update `.cursor/rules` in the same pass if anything Cursor-specific needs to change.
+
 ## Tech stack
 - TypeScript everywhere; no mixed-language islands.
 - Built and iterated inside Cursor, so responses favor concise clarity over perfect grammar.
