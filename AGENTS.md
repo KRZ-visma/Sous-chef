@@ -4,22 +4,24 @@
 
 ### Overview
 
-Sous-chef is currently a scaffolding-only repo: a static HTML placeholder page under `site/` deployed to GitHub Pages. There is no build step, no `package.json`, no dependencies, and no test suite yet. See `docs/tech.md` for the planned TypeScript + BDD stack and project conventions.
+The web app under `site/` is a **Vite + React + TypeScript** single-page app. Static recipe JSON ships under `site/public/data/recipes/` and is fetched at runtime. See `docs/tech.md` for conventions and the planned BDD workflow.
 
 ### Running the site locally
 
-Serve `site/` with any static file server. Example:
-
 ```
-cd site && python3 -m http.server 8080
+cd site && npm install && npm run dev
 ```
 
-Then open `http://localhost:8080/`.
+Vite listens on **all interfaces** (`host: true` in `vite.config.ts`), so **Cloud Desktop** port forwarding can reach the app. Open the URL Vite prints (typically `http://localhost:5173/` or the forwarded preview URL shown in the IDE).
 
 ### Lint / Test / Build
 
-No lint, test, or build tooling is configured yet. When TypeScript tooling is added, update this section accordingly.
+- **Lint:** `cd site && npm run lint`
+- **Production build:** `cd site && npm run build` (output in `site/dist/`)
+- **Preview production build:** `cd site && npm run preview`
+
+No automated test suite is wired up yet.
 
 ### Deployment
 
-Merges to `main` auto-deploy `site/` to GitHub Pages via `.github/workflows/pages-deploy.yml`. PRs get the site folder uploaded as a CI artifact for manual review (`.github/workflows/pages-pr-verify.yml`).
+Merges to `main` build `site/` and deploy **`site/dist/`** to GitHub Pages via `.github/workflows/pages-deploy.yml`. PRs upload the built **`site/dist/`** folder as a CI artifact for manual review (`.github/workflows/pages-pr-verify.yml`).
