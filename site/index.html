@@ -67,6 +67,12 @@
         flex: 1;
         min-height: 4rem;
       }
+      .recipe-covers {
+        margin: 0 0 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: color-mix(in srgb, CanvasText 72%, Canvas);
+      }
       .ingredients {
         margin: 0;
         padding-left: 1.1rem;
@@ -206,14 +212,32 @@
           return prefix + ing.item;
         }
 
-        function fillIngredients(wrap, recipe) {
+        /** Weekday labels this recipe covers when started on startDayIndex (0–6). */
+        function recipeCalendarDayLabels(recipe, startDayIndex) {
+          if (!recipe) return [];
+          var raw = recipe.days;
+          var span =
+            typeof raw === "number" && raw >= 1
+              ? Math.floor(raw)
+              : 1;
+          var labels = [];
+          for (var o = 0; o < span && startDayIndex + o < 7; o++) {
+            labels.push(DAY_LABELS[startDayIndex + o]);
+          }
+          return labels;
+        }
+
+        function fillDayDetail(wrap, recipe, startDayIndex) {
           wrap.innerHTML = "";
           if (!recipe) {
-            var p = document.createElement("p");
-            p.className = "ingredients-empty";
-            p.textContent = "No recipe selected.";
-            wrap.appendChild(p);
             return;
+          }
+          var dayLabels = recipeCalendarDayLabels(recipe, startDayIndex);
+          if (dayLabels.length > 0) {
+            var covers = document.createElement("p");
+            covers.className = "recipe-covers";
+            covers.textContent = "Covers: " + dayLabels.join(", ");
+            wrap.appendChild(covers);
           }
           var ings = recipe.ingredients;
           if (!Array.isArray(ings) || ings.length === 0) {
@@ -288,18 +312,20 @@
 
               var ingWrap = document.createElement("div");
               ingWrap.className = "ingredients-wrap";
-              fillIngredients(
+              fillDayDetail(
                 ingWrap,
-                select.value ? recipesById[select.value] : null
+                select.value ? recipesById[select.value] : null,
+                dayIndex
               );
 
               select.addEventListener("change", function () {
                 var pid = loadPlan();
                 pid.slots[dayIndex] = select.value || null;
                 savePlan(pid);
-                fillIngredients(
+                fillDayDetail(
                   ingWrap,
-                  select.value ? recipesById[select.value] : null
+                  select.value ? recipesById[select.value] : null,
+                  dayIndex
                 );
                 setStatus("Week plan saved on this device.");
               });
