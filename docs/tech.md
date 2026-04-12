@@ -35,3 +35,8 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - Use concise bullet notes; include current status (planned, in progress, done).
 - Example:
   - `auth/login`: planned — capture Persona A login flow.
+- For **behavior, rationale, and functional decisions**, add or link records under **`docs/decisions/features/`** (see **`docs/decisions/README.md`**). Technical trade-offs belong in **`docs/decisions/technical/`** (ADR-style templates in **`docs/decisions/templates/`**).
+
+## Planning and new work
+- **`docs/work/backlog.md`** — lightweight in-repo backlog (good for agents and PR-friendly edits).
+- **GitHub Projects** — optional; use when you need assignees, boards, and cross-repo views. See **`docs/work/README.md`** for when to use which.
