@@ -13,7 +13,7 @@
         --surface: color-mix(in srgb, Canvas 92%, CanvasText 4%);
       }
       body {
-        max-width: 44rem;
+        max-width: min(100%, 96rem);
         margin: 2rem auto;
         padding: 0 1rem;
       }
@@ -30,24 +30,31 @@
       .week {
         margin-top: 1.5rem;
         display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.65rem;
+        overflow-x: auto;
+        padding-bottom: 0.35rem;
+        align-items: stretch;
+        -webkit-overflow-scrolling: touch;
       }
-      .day-row {
-        display: grid;
-        grid-template-columns: 7.5rem 1fr;
-        gap: 0.75rem;
-        align-items: center;
-        padding: 0.65rem 0.85rem;
+      .day-column {
+        flex: 1 1 0;
+        min-width: 10.5rem;
+        max-width: 16rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.65rem 0.75rem;
         border: 1px solid var(--border);
         border-radius: 10px;
         background: var(--surface);
       }
       .day-label {
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
-      .day-row select {
+      .day-column select {
         width: 100%;
         font: inherit;
         padding: 0.4rem 0.5rem;
@@ -55,6 +62,25 @@
         border: 1px solid var(--border);
         background: Canvas;
         color: CanvasText;
+      }
+      .ingredients-wrap {
+        flex: 1;
+        min-height: 4rem;
+      }
+      .ingredients {
+        margin: 0;
+        padding-left: 1.1rem;
+        font-size: 0.82rem;
+        color: color-mix(in srgb, CanvasText 90%, Canvas);
+      }
+      .ingredients li {
+        margin-bottom: 0.25rem;
+      }
+      .ingredients-empty {
+        margin: 0;
+        font-size: 0.8rem;
+        color: color-mix(in srgb, CanvasText 52%, Canvas);
+        font-style: italic;
       }
       .toolbar {
         margin-top: 1.25rem;
@@ -113,37 +139,6 @@
       <p class="status" id="status" aria-live="polite"></p>
     </main>
 
-    <!-- Fallback when fetch() cannot load JSON (e.g. file:// or restricted preview). Keep in sync with site/data/recipes/*.json -->
-    <script type="application/json" id="sous-chef-embedded-recipes">
-{
-  "recipes": [
-    {
-      "id": "example-lentil-soup",
-      "name": "Example lentil soup",
-      "days": 2,
-      "ingredients": [
-        { "item": "red lentils", "amount": "200", "unit": "g" },
-        { "item": "onion", "amount": "1" },
-        { "item": "vegetable stock" },
-        { "item": "salt and pepper" }
-      ]
-    },
-    {
-      "id": "simple-pasta-salad",
-      "name": "Simple pasta salad",
-      "days": 1,
-      "ingredients": [
-        { "item": "short pasta", "amount": "250", "unit": "g" },
-        { "item": "cherry tomatoes", "amount": "150", "unit": "g" },
-        { "item": "mozzarella", "amount": "125", "unit": "g" },
-        { "item": "olive oil" },
-        { "item": "basil" }
-      ]
-    }
-  ]
-}
-    </script>
-
     <script>
       (function () {
         const STORAGE_KEY = "sous-chef:week-plan:v1";
@@ -160,10 +155,6 @@
         /** @type {Record<string, object> | null} */
         let recipesById = null;
 
-        /** In-memory plan when localStorage is blocked (private mode / strict iframe). */
-        let planMemoryFallback = null;
-        let storageUnavailableMessage = "";
-
         function loadPlan() {
           try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -174,11 +165,8 @@
               return s === null || s === "" ? null : String(s);
             });
             while (slots.length < 7) slots.push(null);
-            const out = { slots: slots.slice(0, 7) };
-            planMemoryFallback = out;
-            return out;
+            return { slots: slots.slice(0, 7) };
           } catch {
-            if (planMemoryFallback) return planMemoryFallback;
             return emptyPlan();
           }
         }
@@ -188,16 +176,10 @@
         }
 
         function savePlan(plan) {
-          planMemoryFallback = plan;
-          try {
-            localStorage.setItem(
-              STORAGE_KEY,
-              JSON.stringify({ slots: plan.slots })
-            );
-          } catch (e) {
-            storageUnavailableMessage =
-              " Storage is unavailable in this preview; your plan lasts until you close the tab.";
-          }
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ slots: plan.slots })
+          );
         }
 
         function setStatus(message, isError) {
@@ -213,6 +195,51 @@
               ? " — " + d + (d === 1 ? " day" : " days")
               : "";
           return recipe.name + suffix;
+        }
+
+        function formatIngredientLine(ing) {
+          if (!ing || !ing.item) return "";
+          var bits = [];
+          if (ing.amount) bits.push(String(ing.amount));
+          if (ing.unit) bits.push(ing.unit);
+          var prefix = bits.length ? bits.join(" ") + " " : "";
+          return prefix + ing.item;
+        }
+
+        function fillIngredients(wrap, recipe) {
+          wrap.innerHTML = "";
+          if (!recipe) {
+            var p = document.createElement("p");
+            p.className = "ingredients-empty";
+            p.textContent = "No recipe selected.";
+            wrap.appendChild(p);
+            return;
+          }
+          var ings = recipe.ingredients;
+          if (!Array.isArray(ings) || ings.length === 0) {
+            var p2 = document.createElement("p");
+            p2.className = "ingredients-empty";
+            p2.textContent = "No ingredients listed.";
+            wrap.appendChild(p2);
+            return;
+          }
+          var ul = document.createElement("ul");
+          ul.className = "ingredients";
+          for (var i = 0; i < ings.length; i++) {
+            var line = formatIngredientLine(ings[i]);
+            if (!line) continue;
+            var li = document.createElement("li");
+            li.textContent = line;
+            ul.appendChild(li);
+          }
+          if (ul.childNodes.length === 0) {
+            var p3 = document.createElement("p");
+            p3.className = "ingredients-empty";
+            p3.textContent = "No ingredients listed.";
+            wrap.appendChild(p3);
+            return;
+          }
+          wrap.appendChild(ul);
         }
 
         function renderWeek(recipes) {
@@ -232,9 +259,9 @@
 
           for (var d = 0; d < 7; d++) {
             (function (dayIndex) {
-              var row = document.createElement("div");
-              row.className = "day-row";
-              row.setAttribute("role", "listitem");
+              var col = document.createElement("div");
+              col.className = "day-column";
+              col.setAttribute("role", "listitem");
 
               var label = document.createElement("div");
               label.className = "day-label";
@@ -259,30 +286,34 @@
               var current = plan.slots[dayIndex];
               select.value = current && recipesById[current] ? current : "";
 
+              var ingWrap = document.createElement("div");
+              ingWrap.className = "ingredients-wrap";
+              fillIngredients(
+                ingWrap,
+                select.value ? recipesById[select.value] : null
+              );
+
               select.addEventListener("change", function () {
                 var pid = loadPlan();
                 pid.slots[dayIndex] = select.value || null;
                 savePlan(pid);
-                var msg = "Week plan saved on this device.";
-                if (storageUnavailableMessage) {
-                  msg += storageUnavailableMessage;
-                }
-                setStatus(msg);
+                fillIngredients(
+                  ingWrap,
+                  select.value ? recipesById[select.value] : null
+                );
+                setStatus("Week plan saved on this device.");
               });
 
-              row.appendChild(label);
-              row.appendChild(select);
-              week.appendChild(row);
+              col.appendChild(label);
+              col.appendChild(select);
+              col.appendChild(ingWrap);
+              week.appendChild(col);
             })(d);
           }
 
           app.appendChild(week);
           document.getElementById("toolbar").hidden = false;
-          var baseMsg = "Week plan loaded. Changes save automatically.";
-          if (storageUnavailableMessage) {
-            baseMsg += storageUnavailableMessage;
-          }
-          setStatus(baseMsg);
+          setStatus("Week plan loaded. Changes save automatically.");
 
           document.getElementById("clear-plan").onclick = function () {
             savePlan(emptyPlan());
@@ -300,33 +331,8 @@
           setStatus("", false);
         }
 
-        function sortRecipes(recipes) {
-          var copy = recipes.slice();
-          copy.sort(function (a, b) {
-            return a.name.localeCompare(b.name, undefined, {
-              sensitivity: "base",
-            });
-          });
-          return copy;
-        }
-
-        function readEmbeddedRecipes() {
-          var el = document.getElementById("sous-chef-embedded-recipes");
-          if (!el || !el.textContent) return [];
-          try {
-            var data = JSON.parse(el.textContent);
-            var list = data && data.recipes;
-            return Array.isArray(list) ? list : [];
-          } catch (e) {
-            console.warn(e);
-            return [];
-          }
-        }
-
-        async function loadRecipesFromNetwork() {
-          var base = new URL(".", document.baseURI);
-          var indexUrl = new URL("data/recipes/_index.json", base);
-          var indexRes = await fetch(indexUrl);
+        async function loadRecipes() {
+          var indexRes = await fetch("data/recipes/_index.json");
           if (!indexRes.ok) {
             throw new Error("Could not load recipe list.");
           }
@@ -339,11 +345,8 @@
           var recipes = [];
           for (var i = 0; i < ids.length; i++) {
             var id = ids[i];
-            var recipeUrl = new URL(
-              "data/recipes/" + encodeURIComponent(id) + ".json",
-              base
-            );
-            var res = await fetch(recipeUrl);
+            var path = "data/recipes/" + encodeURIComponent(id) + ".json";
+            var res = await fetch(path);
             if (!res.ok) {
               throw new Error('Missing recipe file for "' + id + '".');
             }
@@ -354,20 +357,13 @@
             recipes.push(recipe);
           }
 
-          return sortRecipes(recipes);
-        }
+          recipes.sort(function (a, b) {
+            return a.name.localeCompare(b.name, undefined, {
+              sensitivity: "base",
+            });
+          });
 
-        async function loadRecipes() {
-          try {
-            return await loadRecipesFromNetwork();
-          } catch (err) {
-            console.warn("Recipe fetch failed; using embedded fallback.", err);
-            var embedded = readEmbeddedRecipes();
-            if (embedded.length === 0) {
-              throw err;
-            }
-            return sortRecipes(embedded);
-          }
+          return recipes;
         }
 
         loadRecipes()
