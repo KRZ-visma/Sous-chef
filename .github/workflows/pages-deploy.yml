@@ -35,7 +35,7 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
-      - name: Install and build site
+      - name: Install, lint, and build site
         run: |
           cd site
           npm ci
