@@ -6,9 +6,12 @@ import react from '@vitejs/plugin-react'
 const repo = 'Sous-chef'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: process.env.CI === 'true' ? `/${repo}/` : '/',
+  // Use the repo subpath only for production builds. Many CI/dev shells set `CI=true`;
+  // tying `base` to that breaks `vite dev` (assets would load from /Repo/ while the
+  // dev server is served at /).
+  base: command === 'build' ? `/${repo}/` : '/',
   // Listen on all interfaces so Cloud Desktop / port-forwarded previews can reach the dev server.
   server: {
     host: true,
@@ -25,4 +28,4 @@ export default defineConfig({
     setupFiles: ['./test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
-})
+}))
