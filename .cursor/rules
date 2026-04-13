@@ -6,6 +6,7 @@ Authoritative project guidance (TypeScript stack, BDD workflow, commit format, b
 
 - When you change tooling, workflow, or the feature catalog, **update `docs/tech.md`**.
 - If `.cursor/rules` needs a Cursor-only note (see below), add or edit it in the same change so expectations stay consistent.
+- When a PR changes behavior, product rules, architecture, or key technical constraints, include a decision record update under `docs/decisions/` (new record or explicit update to an existing one).
 
 ## Cursor-specific
 

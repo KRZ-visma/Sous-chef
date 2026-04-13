@@ -12,6 +12,7 @@ This folder holds **durable decisions** in two tracks. Use plain Markdown with *
 - **Filenames:** `NNNN-short-kebab-title.md` with a four-digit sequence per folder (`0001`, `0002`, …). Feature records may prefix the id in front matter as `FD-0001`; technical records as `ADR-0001` (aligned with the filename number).
 - **Status:** Keep `status` in front matter current. When replacing a decision, add a new file and mark the old one `superseded` with `superseded_by` pointing to the new id.
 - **Templates:** Copy from [`templates/adr.md`](./templates/adr.md) or [`templates/feature-decision.md`](./templates/feature-decision.md).
+- **Change gate:** If a PR changes product behavior, decision logic, architecture, or important constraints, it must include a corresponding decision record change in this directory.
 
 ## Relationship to other docs
 
