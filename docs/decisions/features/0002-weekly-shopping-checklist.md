@@ -47,6 +47,6 @@ Non-goals:
 ## References
 
 - `docs/decisions/features/0001-week-planner-multi-day-continuation.md`
-- `site/src/App.tsx`
+- `site/src/pages/WeekPlanPage.tsx`
 - `site/src/lib/weekPlan.ts`
 - `site/src/lib/weekPlanStorage.ts`
