@@ -17,10 +17,9 @@ Vite listens on **all interfaces** (`host: true` in `vite.config.ts`), so **Clou
 ### Lint / Test / Build
 
 - **Lint:** `cd site && npm run lint`
-- **Production build:** `cd site && npm run build` (output in `site/dist/`)
+- **Unit tests:** `cd site && npm run test` (watch) or `cd site && npm run test:run` (CI-style single run)
+- **Production build:** `cd site && npm run build` runs TypeScript, unit tests, then Vite (output in `site/dist/`)
 - **Preview production build:** `cd site && npm run preview`
-
-No automated test suite is wired up yet.
 
 ### Deployment
 
