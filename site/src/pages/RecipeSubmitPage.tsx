@@ -1,4 +1,6 @@
-import { type FormEvent, useCallback, useMemo, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { loadRecipes } from '../lib/loadRecipes'
+import { nextAvailableRecipeId, slugifyRecipeName } from '../lib/recipeId'
 import type { Recipe, RecipeIngredient } from '../types/recipe'
 
 type IngredientRow = {
@@ -25,6 +27,8 @@ function submitRecipeUrl(): string {
 export default function RecipeSubmitPage() {
   const [id, setId] = useState('')
   const [name, setName] = useState('')
+  const [idEditedManually, setIdEditedManually] = useState(false)
+  const [existingIds, setExistingIds] = useState<Set<string>>(() => new Set())
   const [days, setDays] = useState('1')
   const [ingredients, setIngredients] = useState<IngredientRow[]>(() => [
     emptyIngredientRow(),
@@ -32,15 +36,42 @@ export default function RecipeSubmitPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prUrl, setPrUrl] = useState<string | null>(null)
+  const normalizedId = useMemo(() => slugifyRecipeName(id), [id])
+  const idCollision = useMemo(
+    () => normalizedId.length > 0 && existingIds.has(normalizedId),
+    [existingIds, normalizedId],
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const recipes = await loadRecipes()
+        if (cancelled) return
+        setExistingIds(new Set(recipes.map((r) => r.id)))
+      } catch {
+        // Keep form usable even if recipes cannot be fetched right now.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (idEditedManually) return
+    setId(nextAvailableRecipeId(name, existingIds))
+  }, [existingIds, idEditedManually, name])
 
   const canSubmit = useMemo(() => {
     return (
-      id.trim().length > 0 &&
+      normalizedId.length > 0 &&
+      !idCollision &&
       name.trim().length > 0 &&
       days.trim().length > 0 &&
       ingredients.some((r) => r.item.trim().length > 0)
     )
-  }, [id, name, days, ingredients])
+  }, [normalizedId, idCollision, name, days, ingredients])
 
   const addIngredient = useCallback(() => {
     setIngredients((prev) => [...prev, emptyIngredientRow()])
@@ -73,12 +104,12 @@ export default function RecipeSubmitPage() {
         return ing
       })
     return {
-      id: id.trim(),
+      id: normalizedId,
       name: name.trim(),
       days: d,
       ingredients: rows,
     }
-  }, [id, name, days, ingredients])
+  }, [normalizedId, name, days, ingredients])
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -136,9 +167,22 @@ export default function RecipeSubmitPage() {
             spellCheck={false}
             placeholder="e.g. spicy-chickpea-stew"
             value={id}
-            onChange={(e) => setId(e.target.value)}
+            onChange={(e) => {
+              setIdEditedManually(true)
+              setId(e.target.value)
+            }}
             required
           />
+          {id && id !== normalizedId && (
+            <p className="status">
+              Will submit as <code>{normalizedId}</code>.
+            </p>
+          )}
+          {idCollision && (
+            <p className="error" role="alert">
+              Recipe id collision: <code>{normalizedId}</code> already exists.
+            </p>
+          )}
         </div>
         <div className="field-row">
           <label htmlFor="recipe-name">Name</label>
@@ -147,7 +191,10 @@ export default function RecipeSubmitPage() {
             name="name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value
+              setName(next)
+            }}
             required
           />
         </div>

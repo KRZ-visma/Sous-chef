@@ -19,7 +19,7 @@ Sous-chef targets a **static GitHub Pages** deployment with **no database**. Rec
 
 ## Decision
 
-1. **Location:** Recipe files live under **`site/public/data/recipes/`** so Vite copies them to the site root at build time and they are available at predictable URLs on the same origin (for example `fetch("/data/recipes/<id>.json")` in development, or the same path relative to `import.meta.env.BASE_URL` when hosted under a subpath).
+1. **Location:** Recipe files live under **`site/public/data/story-recipes/`** so Vite copies them to the site root at build time and they are available at predictable URLs on the same origin (for example `fetch("/data/story-recipes/<id>.json")` in development, or the same path relative to `import.meta.env.BASE_URL` when hosted under a subpath).
 2. **Granularity:** **One file equals one recipe**, named **`{id}.json`** with kebab-case `id` matching the `id` field inside the file. This keeps diffs small and avoids editing a large single document.
 3. **Format:** **JSON** (not YAML) so the browser can parse it without an extra dependency and tooling stays simple.
 4. **Fields:** Each recipe has **`id`**, **`name`**, **`days`** (how many days the batch covers; typically 1 or 2), and **`ingredients`**.
@@ -36,7 +36,7 @@ Sous-chef targets a **static GitHub Pages** deployment with **no database**. Rec
 ### Negative / risks
 
 - **Index maintenance:** The UI loads **`_index.json`** to discover recipe ids; it must stay in sync when files are added or removed.
-- **No schema enforcement at runtime** until CI validates JSON against **`site/public/data/recipes/_schema.json`** (the project now has a build step; wiring validation is a follow-up).
+- **No schema enforcement at runtime** until CI validates JSON against **`site/public/data/story-recipes/_schema.json`** (the project now has a build step; wiring validation is a follow-up).
 
 ### Follow-ups
 

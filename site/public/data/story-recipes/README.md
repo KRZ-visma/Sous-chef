@@ -1,6 +1,6 @@
 # Recipes (static data)
 
-One **JSON file per recipe**, copied to the published site root as `/data/recipes/` from **`site/public/data/recipes/`** at build time. No database: recipes are versioned in Git and loaded by the app with `fetch()` (same origin).
+One **JSON file per recipe**, copied to the published site root as `/data/story-recipes/` from **`site/public/data/story-recipes/`** at build time. No database: recipes are versioned in Git and loaded by the app with `fetch()` (same origin).
 
 ## File naming
 

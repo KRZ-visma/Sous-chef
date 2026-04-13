@@ -1,5 +1,5 @@
 ---
-id: ADR-0002
+id: ADR-0003
 title: Create recipe pull requests through a server-side API
 status: accepted
 date: 2026-04-13
@@ -11,7 +11,7 @@ supersedes: null
 superseded_by: null
 ---
 
-# ADR-0002: Create recipe pull requests through a server-side API
+# ADR-0003: Create recipe pull requests through a server-side API
 
 ## Context
 

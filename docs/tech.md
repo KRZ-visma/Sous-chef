@@ -30,7 +30,7 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - **Open a GitHub pull request only when the feature is ready for review**—after the work is complete enough to merge, not after the first commit on the branch. Prefer local commits (or draft PRs only if your team explicitly uses them) until you are ready for human review.
 
 ## Recipe data (static)
-- **Location:** **`site/public/data/recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), copied to the site root at build time and deployed with the app. See **`site/public/data/recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
+- **Location:** **`site/public/data/story-recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), copied to the site root at build time and deployed with the app. See **`site/public/data/story-recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
 
 ## Frontend (Vite + React + TypeScript)
 - Source lives under **`site/src/`**. **`npm run dev`** runs the Vite dev server; **`npm run build`** emits static assets to **`site/dist/`** (this is what GitHub Pages publishes).

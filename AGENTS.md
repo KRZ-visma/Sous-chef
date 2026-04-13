@@ -4,7 +4,7 @@
 
 ### Overview
 
-The web app under `site/` is a **Vite + React + TypeScript** single-page app. Static recipe JSON ships under `site/public/data/recipes/` and is fetched at runtime. See `docs/tech.md` for conventions and the planned BDD workflow.
+The web app under `site/` is a **Vite + React + TypeScript** single-page app. Static recipe JSON ships under `site/public/data/story-recipes/` and is fetched at runtime. See `docs/tech.md` for conventions and the planned BDD workflow.
 
 ### Running the site locally
 

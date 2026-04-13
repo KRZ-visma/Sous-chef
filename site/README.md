@@ -1,6 +1,6 @@
 # Sous-chef web app
 
-Vite + React + TypeScript. Recipe JSON lives in `public/data/recipes/` and is fetched at runtime.
+Vite + React + TypeScript. Recipe JSON lives in `public/data/story-recipes/` and is fetched at runtime.
 
 ```bash
 npm install

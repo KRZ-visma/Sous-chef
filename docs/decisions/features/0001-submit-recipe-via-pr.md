@@ -5,7 +5,7 @@ status: accepted
 date: 2026-04-13
 area: recipe-catalog
 personas: [maintainer, contributor]
-related_adrs: [ADR-0002]
+related_adrs: [ADR-0003]
 supersedes: null
 superseded_by: null
 ---
@@ -41,4 +41,4 @@ The system should provide an "Add recipe" page where users can enter id, name, d
 - `site/src/pages/RecipeSubmitPage.tsx`
 - `site/api/submit-recipe.ts`
 - `site/server/recipePr.ts`
-- ADR-0002
+- ADR-0003

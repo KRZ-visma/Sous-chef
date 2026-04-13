@@ -14,11 +14,11 @@ export type CreateRecipePrResult =
   | { ok: false; status: number; message: string }
 
 function recipeJsonPath(id: string): string {
-  return `site/public/data/recipes/${id}.json`
+  return `site/public/data/story-recipes/${id}.json`
 }
 
 function indexJsonPath(): string {
-  return 'site/public/data/recipes/_index.json'
+  return 'site/public/data/story-recipes/_index.json'
 }
 
 export function validateRecipeForSubmit(input: unknown): Recipe {

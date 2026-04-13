@@ -16,13 +16,13 @@ describe('loadRecipes', () => {
       'fetch',
       vi.fn(async (input: string | URL | Request) => {
         const url = requestUrl(input)
-        if (url.endsWith('/data/recipes/_index.json')) {
+        if (url.endsWith('/data/story-recipes/_index.json')) {
           return new Response(JSON.stringify({ recipes: ['b-id', 'a-id'] }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
           })
         }
-        if (url.includes('/data/recipes/a-id.json')) {
+        if (url.includes('/data/story-recipes/a-id.json')) {
           return new Response(
             JSON.stringify({
               id: 'a-id',
@@ -33,7 +33,7 @@ describe('loadRecipes', () => {
             { status: 200, headers: { 'Content-Type': 'application/json' } },
           )
         }
-        if (url.includes('/data/recipes/b-id.json')) {
+        if (url.includes('/data/story-recipes/b-id.json')) {
           return new Response(
             JSON.stringify({
               id: 'b-id',
@@ -66,7 +66,7 @@ describe('loadRecipes', () => {
     await loadRecipes()
     const fetchMock = vi.mocked(globalThis.fetch)
     const urls = fetchMock.mock.calls.map((c) => String(c[0]))
-    expect(urls.some((u) => u.includes('/my-repo/data/recipes/_index.json'))).toBe(
+    expect(urls.some((u) => u.includes('/my-repo/data/story-recipes/_index.json'))).toBe(
       true,
     )
   })

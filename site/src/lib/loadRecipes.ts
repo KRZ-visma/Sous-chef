@@ -2,11 +2,11 @@ import type { Recipe, RecipeIndexFile } from '../types/recipe'
 
 function recipePath(id: string): string {
   const base = import.meta.env.BASE_URL
-  return `${base}data/recipes/${encodeURIComponent(id)}.json`
+  return `${base}data/story-recipes/${encodeURIComponent(id)}.json`
 }
 
 function indexPath(): string {
-  return `${import.meta.env.BASE_URL}data/recipes/_index.json`
+  return `${import.meta.env.BASE_URL}data/story-recipes/_index.json`
 }
 
 export async function loadRecipes(): Promise<Recipe[]> {
