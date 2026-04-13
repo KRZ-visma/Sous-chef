@@ -57,16 +57,26 @@ h1 {
   color: CanvasText;
 }
 
+.day-column select:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+  background: color-mix(in srgb, Canvas 88%, CanvasText);
+}
+
+.day-column--continuation {
+  opacity: 0.92;
+}
+
+.already-planned {
+  margin: 0;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, CanvasText 58%, Canvas);
+  font-style: italic;
+}
+
 .ingredients-wrap {
   flex: 1;
   min-height: 4rem;
-}
-
-.recipe-covers {
-  margin: 0 0 0.4rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: color-mix(in srgb, CanvasText 72%, Canvas);
 }
 
 .ingredients {

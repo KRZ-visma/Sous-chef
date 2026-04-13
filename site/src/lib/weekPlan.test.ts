@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   DAY_LABELS,
+  findContinuationStartDay,
   formatIngredientLine,
   mergePlanWithCatalog,
+  normalizeCoveredSlots,
   recipeCalendarDayLabels,
   recipeOptionLabel,
 } from './weekPlan'
@@ -69,14 +71,76 @@ describe('recipeCalendarDayLabels', () => {
     ])
   })
 
-  it('does not extend past Sunday', () => {
+  it('wraps from Sunday into Monday', () => {
     const recipe = makeRecipe({ days: 5 })
-    expect(recipeCalendarDayLabels(recipe, 5)).toEqual(['Saturday', 'Sunday'])
+    expect(recipeCalendarDayLabels(recipe, 5)).toEqual([
+      'Saturday',
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+    ])
   })
 
   it('defaults invalid days to a single day', () => {
     expect(recipeCalendarDayLabels(makeRecipe({ days: 0 }), 2)).toEqual([
       'Wednesday',
+    ])
+  })
+})
+
+describe('findContinuationStartDay', () => {
+  it('returns the start day index for continuation rows', () => {
+    const recipesById: Record<string, Recipe> = {
+      curry: makeRecipe({ id: 'curry', days: 3 }),
+    }
+    const slots = ['curry', null, null, null, null, null, null]
+    expect(findContinuationStartDay(1, slots, recipesById)).toBe(0)
+    expect(findContinuationStartDay(2, slots, recipesById)).toBe(0)
+    expect(findContinuationStartDay(0, slots, recipesById)).toBeNull()
+  })
+
+  it('supports Sunday to Monday continuation', () => {
+    const recipesById: Record<string, Recipe> = {
+      roast: makeRecipe({ id: 'roast', days: 2 }),
+    }
+    const slots = [null, null, null, null, null, null, 'roast']
+    expect(findContinuationStartDay(0, slots, recipesById)).toBe(6)
+  })
+})
+
+describe('normalizeCoveredSlots', () => {
+  it('clears slots that are covered by earlier multi-day recipes', () => {
+    const recipesById: Record<string, Recipe> = {
+      stew: makeRecipe({ id: 'stew', days: 3 }),
+      salad: makeRecipe({ id: 'salad', days: 1 }),
+    }
+    const slots = ['stew', 'salad', 'salad', null, null, null, null]
+    expect(normalizeCoveredSlots(slots, recipesById)).toEqual([
+      'stew',
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ])
+  })
+
+  it('clears Monday when covered by a Sunday multi-day recipe', () => {
+    const recipesById: Record<string, Recipe> = {
+      soup: makeRecipe({ id: 'soup', days: 2 }),
+      omelette: makeRecipe({ id: 'omelette', days: 1 }),
+    }
+    const slots = ['omelette', null, null, null, null, null, 'soup']
+    expect(normalizeCoveredSlots(slots, recipesById)).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      'soup',
     ])
   })
 })
@@ -97,7 +161,7 @@ describe('DAY_LABELS', () => {
 
 describe('mergePlanWithCatalog', () => {
   const catalog: Record<string, Recipe> = {
-    'kept-id': makeRecipe({ id: 'kept-id', name: 'Kept' }),
+    'kept-id': makeRecipe({ id: 'kept-id', name: 'Kept', days: 2 }),
   }
 
   beforeEach(() => {
@@ -120,6 +184,18 @@ describe('mergePlanWithCatalog', () => {
   })
 
   it('clears unknown ids and persists when changed', () => {
+    mergePlanWithCatalog(catalog)
+    expect(weekPlanStorage.savePlan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slots: ['kept-id', null, null, null, null, null, null],
+      }),
+    )
+  })
+
+  it('clears continuation slots and persists normalized plan', () => {
+    vi.mocked(weekPlanStorage.loadPlan).mockReturnValue({
+      slots: ['kept-id', 'kept-id', null, null, null, null, null],
+    })
     mergePlanWithCatalog(catalog)
     expect(weekPlanStorage.savePlan).toHaveBeenCalledWith(
       expect.objectContaining({
