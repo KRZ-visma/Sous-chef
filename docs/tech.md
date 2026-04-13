@@ -12,6 +12,13 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - Each cycle ends with a commit before starting the next slice of behavior.
 - Specs describe intent in business terms first, wiring follows afterward.
 
+## Decision record policy (required)
+- Any change that alters user-visible behavior, feature rules, architecture, data shape, integrations, or non-trivial technical constraints must include a decision record update in the same PR.
+- Create a new decision record when introducing a new rule or trade-off. Update an existing record when clarifying, correcting, or superseding a prior decision.
+- Feature behavior decisions belong in `docs/decisions/features/`. Technical and architecture decisions belong in `docs/decisions/technical/`.
+- Use the templates in `docs/decisions/templates/` and keep status metadata accurate (`proposed`, `accepted`, `superseded`, etc.).
+- If no decision record was needed, state why in the PR description so reviewers can verify the exception.
+
 ## Commit style
 - Message format: `<domain>/<component>: <intent of change>`.
 - Focus the summary on why the change matters, not mechanical details.
@@ -41,7 +48,7 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 - Use concise bullet notes; include current status (planned, in progress, done).
 - Example:
   - `auth/login`: planned — capture Persona A login flow.
-- For **behavior, rationale, and functional decisions**, add or link records under **`docs/decisions/features/`** (see **`docs/decisions/README.md`**). Technical trade-offs belong in **`docs/decisions/technical/`** (ADR-style templates in **`docs/decisions/templates/`**).
+- For **behavior, rationale, and functional decisions**, add or link records under **`docs/decisions/features/`** (see **`docs/decisions/README.md`**). Technical trade-offs belong in **`docs/decisions/technical/`** (ADR-style templates in **`docs/decisions/templates/`**). This is required whenever those decisions change.
 
 ## Planning and new work
 - **`docs/work/backlog.md`** — lightweight in-repo backlog (good for agents and PR-friendly edits).
