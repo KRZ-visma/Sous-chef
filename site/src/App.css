@@ -5,6 +5,45 @@
   text-align: left;
 }
 
+.app-header {
+  margin-bottom: 1rem;
+}
+
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.app-nav__link {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: color-mix(in srgb, CanvasText 85%, Canvas);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.app-nav__link:hover {
+  color: CanvasText;
+}
+
+.app-nav__link:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.app-nav__link.active {
+  color: CanvasText;
+  border-bottom-color: color-mix(in srgb, CanvasText 45%, transparent);
+}
+
+.app-main {
+  min-height: 12rem;
+}
+
 h1 {
   font-size: 1.75rem;
   font-weight: 650;
@@ -103,6 +142,54 @@ h1 {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.settings-section {
+  margin-top: 1.5rem;
+  max-width: 28rem;
+}
+
+.settings-section__title {
+  font-size: 1.1rem;
+  font-weight: 650;
+  margin: 0 0 0.75rem;
+}
+
+.settings-field label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.settings-field__hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, CanvasText 72%, Canvas);
+  line-height: 1.4;
+}
+
+.settings-field select {
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: Canvas;
+  color: CanvasText;
+  min-width: 12rem;
+}
+
+.settings-back {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+}
+
+.settings-back a {
+  color: color-mix(in srgb, CanvasText 88%, Canvas);
+}
+
+.settings-back a:hover {
+  color: CanvasText;
 }
 
 .toolbar button {
