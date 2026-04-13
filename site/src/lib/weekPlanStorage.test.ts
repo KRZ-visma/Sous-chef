@@ -20,6 +20,7 @@ describe('weekPlanStorage', () => {
       const plan = emptyPlan()
       expect(plan.slots).toHaveLength(7)
       expect(plan.slots.every((s) => s === null)).toBe(true)
+      expect(plan.shopping).toEqual({})
     })
   })
 
@@ -32,8 +33,10 @@ describe('weekPlanStorage', () => {
       const plan = emptyPlan()
       plan.slots[0] = 'recipe-a'
       plan.slots[6] = 'recipe-b'
+      plan.shopping['milk'] = { inStock: true, inBasket: false }
       savePlan(plan)
       expect(loadPlan().slots).toEqual(plan.slots)
+      expect(loadPlan().shopping).toEqual(plan.shopping)
     })
 
     it('maps empty string to null', () => {
@@ -70,6 +73,22 @@ describe('weekPlanStorage', () => {
     it('returns empty plan when payload has no slots array', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({}))
       expect(loadPlan().slots).toEqual(emptyPlan().slots)
+    })
+
+    it('loads shopping state when present and ignores invalid entries', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          slots: [null, null, null, null, null, null, null],
+          shopping: {
+            apples: { inStock: true, inBasket: false },
+            bad: 'invalid',
+          },
+        }),
+      )
+      expect(loadPlan().shopping).toEqual({
+        apples: { inStock: true, inBasket: false },
+      })
     })
   })
 

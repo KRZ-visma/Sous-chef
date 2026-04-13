@@ -182,10 +182,12 @@ describe('mergePlanWithCatalog', () => {
   beforeEach(() => {
     vi.spyOn(weekPlanStorage, 'loadPlan').mockReturnValue({
       slots: ['kept-id', 'missing-id', null, null, null, null, null],
+      shopping: { milk: { inStock: true, inBasket: false } },
     })
     vi.spyOn(weekPlanStorage, 'savePlan').mockImplementation(() => {})
     vi.spyOn(weekPlanStorage, 'emptyPlan').mockReturnValue({
       slots: [null, null, null, null, null, null, null],
+      shopping: {},
     })
   })
 
@@ -196,6 +198,7 @@ describe('mergePlanWithCatalog', () => {
   it('keeps ids that exist in the catalog', () => {
     const plan = mergePlanWithCatalog(catalog)
     expect(plan.slots[0]).toBe('kept-id')
+    expect(plan.shopping).toEqual({ milk: { inStock: true, inBasket: false } })
   })
 
   it('clears unknown ids and persists when changed', () => {
@@ -210,6 +213,7 @@ describe('mergePlanWithCatalog', () => {
   it('clears continuation slots and persists normalized plan', () => {
     vi.mocked(weekPlanStorage.loadPlan).mockReturnValue({
       slots: ['kept-id', 'kept-id', null, null, null, null, null],
+      shopping: {},
     })
     mergePlanWithCatalog(catalog)
     expect(weekPlanStorage.savePlan).toHaveBeenCalledWith(

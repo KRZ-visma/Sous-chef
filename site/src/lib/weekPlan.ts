@@ -111,6 +111,7 @@ export function mergePlanWithCatalog(
 ): WeekPlan {
   const saved = loadPlan()
   const next = emptyPlan()
+  next.shopping = saved.shopping
   let changed = false
   for (let i = 0; i < 7; i++) {
     const id = saved.slots[i]
