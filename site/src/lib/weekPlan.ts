@@ -98,8 +98,10 @@ export function normalizeCoveredSlots(
 /** Normalize saved slots so unknown recipe ids are cleared (removed recipes). */
 export function mergePlanWithCatalog(
   recipesById: Record<string, Recipe>,
+  googleUserSub?: string,
+  savedOverride?: WeekPlan,
 ): WeekPlan {
-  const saved = loadPlan()
+  const saved = savedOverride ?? loadPlan(googleUserSub)
   const next = emptyPlan()
   let changed = false
   for (let i = 0; i < 7; i++) {
@@ -115,6 +117,6 @@ export function mergePlanWithCatalog(
       next.slots[i] = normalized[i]
     }
   }
-  if (changed) savePlan(next)
+  if (changed) savePlan(next, googleUserSub)
   return next
 }

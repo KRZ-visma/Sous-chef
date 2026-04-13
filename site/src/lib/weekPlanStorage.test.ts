@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { emptyPlan, loadPlan, savePlan } from './weekPlanStorage'
+import {
+  emptyPlan,
+  loadPlan,
+  parseWeekPlanJson,
+  savePlan,
+} from './weekPlanStorage'
 
 const STORAGE_KEY = 'sous-chef:week-plan:v1'
 
@@ -63,6 +68,28 @@ describe('weekPlanStorage', () => {
     it('returns empty plan when payload has no slots array', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({}))
       expect(loadPlan().slots).toEqual(emptyPlan().slots)
+    })
+
+    it('uses a separate storage key per Google user sub', () => {
+      savePlan(
+        { slots: ['a', null, null, null, null, null, null] },
+        'user-1',
+      )
+      expect(loadPlan('user-1').slots[0]).toBe('a')
+      expect(loadPlan().slots.every((s) => s === null)).toBe(true)
+    })
+  })
+
+  describe('parseWeekPlanJson', () => {
+    it('parses valid week plan JSON', () => {
+      const p = parseWeekPlanJson(
+        JSON.stringify({ slots: ['x', null, null, null, null, null, null] }),
+      )
+      expect(p?.slots[0]).toBe('x')
+    })
+
+    it('returns null for invalid JSON', () => {
+      expect(parseWeekPlanJson('not json')).toBeNull()
     })
   })
 })

@@ -189,6 +189,7 @@ describe('mergePlanWithCatalog', () => {
       expect.objectContaining({
         slots: ['kept-id', null, null, null, null, null, null],
       }),
+      undefined,
     )
   })
 
@@ -201,6 +202,17 @@ describe('mergePlanWithCatalog', () => {
       expect.objectContaining({
         slots: ['kept-id', null, null, null, null, null, null],
       }),
+      undefined,
     )
+  })
+
+  it('uses savedOverride instead of loadPlan when provided', () => {
+    vi.mocked(weekPlanStorage.loadPlan).mockReturnValue({
+      slots: [null, null, null, null, null, null, null],
+    })
+    const plan = mergePlanWithCatalog(catalog, undefined, {
+      slots: ['kept-id', null, null, null, null, null, null],
+    })
+    expect(plan.slots[0]).toBe('kept-id')
   })
 })

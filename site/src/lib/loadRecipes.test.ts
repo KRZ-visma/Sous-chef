@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { loadRecipes } from './loadRecipes'
+import { loadBundledRecipes } from './loadRecipes'
 
 function requestUrl(input: string | URL | Request): string {
   if (typeof input === 'string') return input
@@ -7,7 +7,7 @@ function requestUrl(input: string | URL | Request): string {
   return input.url
 }
 
-describe('loadRecipes', () => {
+describe('loadBundledRecipes', () => {
   const originalFetch = globalThis.fetch
   const originalBase = import.meta.env.BASE_URL
 
@@ -57,13 +57,13 @@ describe('loadRecipes', () => {
 
   it('loads recipes from the index and sorts by name', async () => {
     import.meta.env.BASE_URL = '/'
-    const recipes = await loadRecipes()
+    const recipes = await loadBundledRecipes()
     expect(recipes.map((r) => r.id)).toEqual(['a-id', 'b-id'])
   })
 
   it('prefixes requests with BASE_URL', async () => {
     import.meta.env.BASE_URL = '/my-repo/'
-    await loadRecipes()
+    await loadBundledRecipes()
     const fetchMock = vi.mocked(globalThis.fetch)
     const urls = fetchMock.mock.calls.map((c) => String(c[0]))
     expect(urls.some((u) => u.includes('/my-repo/data/recipes/_index.json'))).toBe(
@@ -76,7 +76,9 @@ describe('loadRecipes', () => {
       'fetch',
       vi.fn(async () => new Response('err', { status: 500 })) as typeof fetch,
     )
-    await expect(loadRecipes()).rejects.toThrow('Could not load recipe list.')
+    await expect(loadBundledRecipes()).rejects.toThrow(
+      'Could not load recipe list.',
+    )
   })
 
   it('throws when the index has no recipes', async () => {
@@ -93,7 +95,7 @@ describe('loadRecipes', () => {
         return new Response('Not found', { status: 404 })
       }) as typeof fetch,
     )
-    await expect(loadRecipes()).rejects.toThrow('Recipe list is empty.')
+    await expect(loadBundledRecipes()).rejects.toThrow('Recipe list is empty.')
   })
 
   it('throws when a recipe file is missing', async () => {
@@ -110,7 +112,7 @@ describe('loadRecipes', () => {
         return new Response('Not found', { status: 404 })
       }) as typeof fetch,
     )
-    await expect(loadRecipes()).rejects.toThrow(
+    await expect(loadBundledRecipes()).rejects.toThrow(
       'Missing recipe file for "only".',
     )
   })
@@ -140,6 +142,8 @@ describe('loadRecipes', () => {
         return new Response('Not found', { status: 404 })
       }) as typeof fetch,
     )
-    await expect(loadRecipes()).rejects.toThrow('Recipe id mismatch for "x".')
+    await expect(loadBundledRecipes()).rejects.toThrow(
+      'Recipe id mismatch for "x".',
+    )
   })
 })

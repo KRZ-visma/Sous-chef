@@ -46,6 +46,7 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 ## Feature catalog
 - Maintain a living list of released and upcoming features here.
 - Use concise bullet notes; include current status (planned, in progress, done).
+- `google-drive/recipes`: done — optional sign-in and folder-backed recipes and week plan (see `docs/decisions/features/0002-google-drive-recipes-and-week-plan.md`).
 - Example:
   - `auth/login`: planned — capture Persona A login flow.
 - For **behavior, rationale, and functional decisions**, add or link records under **`docs/decisions/features/`** (see **`docs/decisions/README.md`**). Technical trade-offs belong in **`docs/decisions/technical/`** (ADR-style templates in **`docs/decisions/templates/`**). This is required whenever those decisions change.
