@@ -20,7 +20,7 @@ When the app is configured with a Google OAuth client id and a Drive folder id, 
 
 - If Drive integration env vars are **not** set, behavior stays the same as before: bundled recipes from `site/public/data/recipes/` and week plan in `localStorage` only.
 - If Drive integration **is** set, the first screen asks the user to **Sign in with Google** or **Use sample recipes (offline)**.
-- After Google sign-in, the app requests **read-only Drive** access to load `_index.json` and each `{id}.json` from the configured folder (same layout as the bundled recipes).
+- After Google sign-in, the app requests **Drive** access: read the folder contents, and create or update `week-plan.json` via the restricted `drive.file` scope (plus `drive.readonly` for listing and downloading recipe JSON).
 - The week plan is still stored in **localStorage** for responsiveness, keyed by Google user id when signed in; changes are **written to** `week-plan.json` on Drive when possible.
 - Users can **sign out of Google** to clear the session and return to the recipe source choice.
 

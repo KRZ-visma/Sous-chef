@@ -1,6 +1,8 @@
 import { getGoogleDriveFolderId, getGoogleOAuthClientId } from './googleDriveConfig'
 
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly'
+/** Read recipe JSON; create/update `week-plan.json` in the shared folder. */
+const DRIVE_SCOPE =
+  'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file'
 
 export type GoogleUser = {
   sub: string

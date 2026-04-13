@@ -403,8 +403,8 @@ export default function App() {
             <div className="auth-gate__google">
               <div ref={googleButtonRef} className="auth-gate__google-btn" />
               <p className="auth-gate__hint">
-                You will be asked to allow read access to Google Drive so the app
-                can load your recipe JSON and week plan.
+                You will be asked to allow Google Drive access so the app can
+                load your recipe JSON and save your week plan to the folder.
               </p>
             </div>
           )}
