@@ -38,7 +38,8 @@ Non-goals:
 - Covered days are represented as derived UI state rather than independent plan entries.
 - Week coverage uses cyclic day math, so week-end placement behaves consistently.
 - The planner favors prevention of conflicting edits by disabling continuation day selectors.
-- Users can set the first displayed day of week (stored per browser), and the planner reorders day columns accordingly without changing underlying slot semantics.
+- Users can set the first displayed day of week on the Settings page (stored per browser), and the planner reorders day columns accordingly without changing underlying slot semantics.
+- Client-side routes use hash URLs (for example `/#/settings`) so the Settings page works on static GitHub Pages hosting without extra server rewrites.
 
 ## Open questions
 
@@ -48,6 +49,8 @@ Non-goals:
 ## References
 
 - `site/src/App.tsx`
+- `site/src/pages/WeekPlanPage.tsx`
+- `site/src/pages/SettingsPage.tsx`
 - `site/src/lib/weekPlan.ts`
 - `site/src/lib/weekPlan.test.ts`
 - `site/src/lib/weekPlanStorage.ts`
