@@ -42,3 +42,4 @@ Non-goals:
 ## References
 
 - Google Identity Services (sign-in) and Google Drive API v3 (file list and media download/upload).
+- Step-by-step configuration: **`docs/guides/google-drive-setup.md`**.

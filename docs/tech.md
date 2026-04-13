@@ -31,6 +31,7 @@ Editor and agent context for this repo is configured under **`.cursor/rules`**. 
 
 ## Recipe data (static)
 - **Location:** **`site/public/data/recipes/`** — one **`{id}.json`** file per recipe (kebab-case `id`), copied to the site root at build time and deployed with the app. See **`site/public/data/recipes/README.md`** and **`docs/decisions/technical/0001-recipe-json-storage.md`** for shape and rationale.
+- **Optional Google Drive:** step-by-step setup (GCP, OAuth, folder, CI env vars) is in **`docs/guides/google-drive-setup.md`**.
 
 ## Frontend (Vite + React + TypeScript)
 - Source lives under **`site/src/`**. **`npm run dev`** runs the Vite dev server; **`npm run build`** emits static assets to **`site/dist/`** (this is what GitHub Pages publishes).
