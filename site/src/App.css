@@ -105,6 +105,22 @@ h1 {
   align-items: center;
 }
 
+.first-day-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.first-day-control select {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: Canvas;
+  color: CanvasText;
+}
+
 .toolbar button {
   font: inherit;
   padding: 0.45rem 0.85rem;

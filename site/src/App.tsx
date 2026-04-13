@@ -7,8 +7,16 @@ import {
   mergePlanWithCatalog,
   normalizeCoveredSlots,
   recipeOptionLabel,
+  weekdayOrder,
 } from './lib/weekPlan'
-import { emptyPlan, loadPlan, savePlan, type WeekPlan } from './lib/weekPlanStorage'
+import {
+  emptyPlan,
+  loadFirstDayOfWeekIndex,
+  loadPlan,
+  saveFirstDayOfWeekIndex,
+  savePlan,
+  type WeekPlan,
+} from './lib/weekPlanStorage'
 import type { Recipe } from './types/recipe'
 import './App.css'
 
@@ -50,6 +58,9 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [statusMessage, setStatusMessage] = useState('')
   const [statusIsError, setStatusIsError] = useState(false)
+  const [firstDayIndex, setFirstDayIndex] = useState(() =>
+    loadFirstDayOfWeekIndex(),
+  )
 
   const recipesById = useMemo(() => {
     const map: Record<string, Recipe> = {}
@@ -123,6 +134,17 @@ export default function App() {
     setStatus('Week cleared.', false)
   }, [setStatus])
 
+  const handleFirstDayChange = useCallback(
+    (dayIndex: number) => {
+      setFirstDayIndex(dayIndex)
+      saveFirstDayOfWeekIndex(dayIndex)
+      setStatus('First day of week updated.', false)
+    },
+    [setStatus],
+  )
+
+  const dayOrder = useMemo(() => weekdayOrder(firstDayIndex), [firstDayIndex])
+
   if (loading) {
     return (
       <main>
@@ -161,7 +183,8 @@ export default function App() {
 
       <div id="app">
         <div className="week" role="list">
-          {DAY_LABELS.map((dayLabel, dayIndex) => {
+          {dayOrder.map((dayIndex) => {
+            const dayLabel = DAY_LABELS[dayIndex]
             const selectedId = plan.slots[dayIndex]
             const recipe =
               selectedId && recipesById[selectedId] ? recipesById[selectedId] : null
@@ -213,6 +236,20 @@ export default function App() {
       </div>
 
       <div className="toolbar">
+        <label className="first-day-control">
+          First day of week
+          <select
+            value={String(firstDayIndex)}
+            onChange={(e) => handleFirstDayChange(Number(e.target.value))}
+            aria-label="First day of week"
+          >
+            {DAY_LABELS.map((dayLabel, dayIndex) => (
+              <option key={dayLabel} value={dayIndex}>
+                {dayLabel}
+              </option>
+            ))}
+          </select>
+        </label>
         <button type="button" id="clear-plan" onClick={handleClearWeek}>
           Clear week
         </button>

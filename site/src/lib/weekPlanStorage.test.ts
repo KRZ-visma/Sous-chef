@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { emptyPlan, loadPlan, savePlan } from './weekPlanStorage'
+import {
+  emptyPlan,
+  loadFirstDayOfWeekIndex,
+  loadPlan,
+  saveFirstDayOfWeekIndex,
+  savePlan,
+} from './weekPlanStorage'
 
 const STORAGE_KEY = 'sous-chef:week-plan:v1'
+const FIRST_DAY_STORAGE_KEY = 'sous-chef:first-day-of-week:v1'
 
 describe('weekPlanStorage', () => {
   beforeEach(() => {
@@ -63,6 +70,27 @@ describe('weekPlanStorage', () => {
     it('returns empty plan when payload has no slots array', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({}))
       expect(loadPlan().slots).toEqual(emptyPlan().slots)
+    })
+  })
+
+  describe('first day of week settings', () => {
+    it('defaults to Monday when unset', () => {
+      expect(loadFirstDayOfWeekIndex()).toBe(0)
+    })
+
+    it('round-trips first day index', () => {
+      saveFirstDayOfWeekIndex(1)
+      expect(loadFirstDayOfWeekIndex()).toBe(1)
+    })
+
+    it('normalizes out-of-range values', () => {
+      saveFirstDayOfWeekIndex(8)
+      expect(loadFirstDayOfWeekIndex()).toBe(1)
+    })
+
+    it('falls back to Monday for invalid stored values', () => {
+      localStorage.setItem(FIRST_DAY_STORAGE_KEY, 'not-a-number')
+      expect(loadFirstDayOfWeekIndex()).toBe(0)
     })
   })
 })

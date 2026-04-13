@@ -7,6 +7,7 @@ import {
   normalizeCoveredSlots,
   recipeCalendarDayLabels,
   recipeOptionLabel,
+  weekdayOrder,
 } from './weekPlan'
 import type { Recipe } from '../types/recipe'
 import * as weekPlanStorage from './weekPlanStorage'
@@ -156,6 +157,20 @@ describe('DAY_LABELS', () => {
       'Saturday',
       'Sunday',
     ])
+  })
+})
+
+describe('weekdayOrder', () => {
+  it('returns Monday-first order for index 0', () => {
+    expect(weekdayOrder(0)).toEqual([0, 1, 2, 3, 4, 5, 6])
+  })
+
+  it('returns Tuesday-first order for index 1', () => {
+    expect(weekdayOrder(1)).toEqual([1, 2, 3, 4, 5, 6, 0])
+  })
+
+  it('normalizes out-of-range indexes', () => {
+    expect(weekdayOrder(8)).toEqual([1, 2, 3, 4, 5, 6, 0])
   })
 })
 

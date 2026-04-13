@@ -12,6 +12,16 @@ const DAY_LABELS = [
 ] as const
 
 export { DAY_LABELS }
+export type WeekdayLabel = (typeof DAY_LABELS)[number]
+
+export function weekdayIndex(dayLabel: WeekdayLabel): number {
+  return DAY_LABELS.indexOf(dayLabel)
+}
+
+export function weekdayOrder(firstDayIndex: number): number[] {
+  const normalized = ((Math.floor(firstDayIndex) % 7) + 7) % 7
+  return Array.from({ length: 7 }, (_, i) => (normalized + i) % 7)
+}
 
 export function recipeOptionLabel(recipe: Recipe): string {
   const d = recipe.days
