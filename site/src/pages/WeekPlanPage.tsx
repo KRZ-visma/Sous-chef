@@ -150,6 +150,7 @@ export default function WeekPlanPage() {
       setPlan((prev) => {
         const next: WeekPlan = {
           slots: [...prev.slots],
+          shopping: prev.shopping,
         }
         next.slots[dayIndex] = recipeId || null
         const normalizedSlots = normalizeCoveredSlots(
