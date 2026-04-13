@@ -35,6 +35,7 @@ export function formatIngredientLine(ing: {
   return prefix + ing.item
 }
 
+/** Calendar days one recipe instance covers when placed on startDayIndex (wraps week). */
 export function recipeCalendarDayLabels(
   recipe: Recipe | null,
   startDayIndex: number,
@@ -44,10 +45,54 @@ export function recipeCalendarDayLabels(
   const span =
     typeof raw === 'number' && raw >= 1 ? Math.floor(raw) : 1
   const labels: string[] = []
-  for (let o = 0; o < span && startDayIndex + o < 7; o++) {
-    labels.push(DAY_LABELS[startDayIndex + o])
+  for (let o = 0; o < span; o++) {
+    labels.push(DAY_LABELS[(startDayIndex + o) % 7])
   }
   return labels
+}
+
+export function recipeSpanDays(recipe: Recipe | null): number {
+  if (!recipe) return 0
+  const raw = recipe.days
+  return typeof raw === 'number' && raw >= 1 ? Math.floor(raw) : 1
+}
+
+/**
+ * If this day is covered by a multi-day recipe that started on an earlier day
+ * in the same week (including wrap: Sunday → Monday), returns that start day index.
+ */
+export function findContinuationStartDay(
+  dayIndex: number,
+  slots: (string | null)[],
+  recipesById: Record<string, Recipe>,
+): number | null {
+  for (let s = 0; s < 7; s++) {
+    const id = slots[s]
+    if (!id) continue
+    const recipe = recipesById[id]
+    if (!recipe) continue
+    const span = recipeSpanDays(recipe)
+    for (let o = 1; o < span; o++) {
+      if ((s + o) % 7 === dayIndex) {
+        return s
+      }
+    }
+  }
+  return null
+}
+
+/** Clear slots that are continuation days so each multi-day recipe only appears on its start day. */
+export function normalizeCoveredSlots(
+  slots: (string | null)[],
+  recipesById: Record<string, Recipe>,
+): (string | null)[] {
+  const next = [...slots]
+  for (let d = 0; d < 7; d++) {
+    if (findContinuationStartDay(d, next, recipesById) !== null) {
+      next[d] = null
+    }
+  }
+  return next
 }
 
 /** Normalize saved slots so unknown recipe ids are cleared (removed recipes). */
@@ -62,6 +107,13 @@ export function mergePlanWithCatalog(
     const valid = id && recipesById[id] ? id : null
     next.slots[i] = valid
     if (valid !== id) changed = true
+  }
+  const normalized = normalizeCoveredSlots(next.slots, recipesById)
+  for (let i = 0; i < 7; i++) {
+    if (normalized[i] !== next.slots[i]) {
+      changed = true
+      next.slots[i] = normalized[i]
+    }
   }
   if (changed) savePlan(next)
   return next

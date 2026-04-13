@@ -2,35 +2,24 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { loadRecipes } from './lib/loadRecipes'
 import {
   DAY_LABELS,
+  findContinuationStartDay,
   formatIngredientLine,
   mergePlanWithCatalog,
-  recipeCalendarDayLabels,
+  normalizeCoveredSlots,
   recipeOptionLabel,
 } from './lib/weekPlan'
 import { emptyPlan, loadPlan, savePlan, type WeekPlan } from './lib/weekPlanStorage'
 import type { Recipe } from './types/recipe'
 import './App.css'
 
-function DayIngredients({
-  recipe,
-  dayIndex,
-}: {
-  recipe: Recipe | null
-  dayIndex: number
-}) {
+function DayIngredients({ recipe }: { recipe: Recipe | null }) {
   if (!recipe) {
     return null
   }
-  const dayLabels = recipeCalendarDayLabels(recipe, dayIndex)
   const ings = recipe.ingredients
 
   return (
     <>
-      {dayLabels.length > 0 && (
-        <p className="recipe-covers">
-          Covers: {dayLabels.join(', ')}
-        </p>
-      )}
       {!Array.isArray(ings) || ings.length === 0 ? (
         <p className="ingredients-empty">No ingredients listed.</p>
       ) : (
@@ -114,12 +103,17 @@ export default function App() {
           slots: [...prev.slots],
         }
         next.slots[dayIndex] = recipeId || null
-        savePlan(next)
-        return next
+        const normalizedSlots = normalizeCoveredSlots(
+          next.slots,
+          recipesById,
+        )
+        const normalized: WeekPlan = { slots: normalizedSlots }
+        savePlan(normalized)
+        return normalized
       })
       setStatus('Week plan saved on this device.', false)
     },
-    [setStatus],
+    [setStatus, recipesById],
   )
 
   const handleClearWeek = useCallback(() => {
@@ -171,29 +165,46 @@ export default function App() {
             const selectedId = plan.slots[dayIndex]
             const recipe =
               selectedId && recipesById[selectedId] ? recipesById[selectedId] : null
+            const continuationFrom = findContinuationStartDay(
+              dayIndex,
+              plan.slots,
+              recipesById,
+            )
+            const isContinuation = continuationFrom !== null
             return (
               <div
                 key={dayLabel}
-                className="day-column"
+                className={`day-column${isContinuation ? ' day-column--continuation' : ''}`}
                 role="listitem"
               >
                 <div className="day-label">{dayLabel}</div>
                 <select
                   aria-label={`${dayLabel} meal`}
-                  value={selectedId ?? ''}
+                  value={isContinuation ? '' : (selectedId ?? '')}
+                  disabled={isContinuation}
                   onChange={(e) =>
                     handleSlotChange(dayIndex, e.target.value)
                   }
                 >
-                  <option value="">— No recipe —</option>
-                  {recipes.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {recipeOptionLabel(r)}
-                    </option>
-                  ))}
+                  <option value="">
+                    {isContinuation ? 'Already planned' : '— No recipe —'}
+                  </option>
+                  {!isContinuation &&
+                    recipes.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {recipeOptionLabel(r)}
+                      </option>
+                    ))}
                 </select>
                 <div className="ingredients-wrap">
-                  <DayIngredients recipe={recipe} dayIndex={dayIndex} />
+                  {isContinuation ? (
+                    <p className="already-planned">
+                      Already planned — continues from{' '}
+                      {DAY_LABELS[continuationFrom]}.
+                    </p>
+                  ) : (
+                    <DayIngredients recipe={recipe} />
+                  )}
                 </div>
               </div>
             )
