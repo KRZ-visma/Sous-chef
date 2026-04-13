@@ -19,6 +19,16 @@ import {
 } from '../lib/weekPlanStorage'
 import type { Recipe } from '../types/recipe'
 
+type ShoppingEntry = {
+  key: string
+  line: string
+  uses: number
+}
+
+function ingredientKey(line: string): string {
+  return line.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
 function DayIngredients({ recipe }: { recipe: Recipe | null }) {
   if (!recipe) {
     return null
@@ -74,6 +84,30 @@ export default function WeekPlanPage() {
     return map
   }, [recipes])
 
+  const shoppingEntries = useMemo(() => {
+    const byKey = new Map<string, ShoppingEntry>()
+    for (let dayIndex = 0; dayIndex < DAY_LABELS.length; dayIndex++) {
+      const selectedId = plan.slots[dayIndex]
+      if (!selectedId) continue
+      const recipe = recipesById[selectedId]
+      if (!recipe) continue
+      for (const ingredient of recipe.ingredients) {
+        const line = formatIngredientLine(ingredient)
+        if (!line) continue
+        const key = ingredientKey(line)
+        const existing = byKey.get(key)
+        if (existing) {
+          existing.uses += 1
+        } else {
+          byKey.set(key, { key, line, uses: 1 })
+        }
+      }
+    }
+    return Array.from(byKey.values()).sort((a, b) =>
+      a.line.localeCompare(b.line),
+    )
+  }, [plan.slots, recipesById])
+
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -122,7 +156,10 @@ export default function WeekPlanPage() {
           next.slots,
           recipesById,
         )
-        const normalized: WeekPlan = { slots: normalizedSlots }
+        const normalized: WeekPlan = {
+          slots: normalizedSlots,
+          shopping: prev.shopping,
+        }
         savePlan(normalized)
         return normalized
       })
@@ -137,6 +174,32 @@ export default function WeekPlanPage() {
     setPlan(cleared)
     setStatus('Week cleared.', false)
   }, [setStatus])
+
+  const handleShoppingToggle = useCallback(
+    (ingredientId: string, field: 'inStock' | 'inBasket', checked: boolean) => {
+      setPlan((prev) => {
+        const current = prev.shopping[ingredientId] ?? {
+          inStock: false,
+          inBasket: false,
+        }
+        const nextShopping = {
+          ...prev.shopping,
+          [ingredientId]: {
+            ...current,
+            [field]: checked,
+          },
+        }
+        const next: WeekPlan = {
+          slots: prev.slots,
+          shopping: nextShopping,
+        }
+        savePlan(next)
+        return next
+      })
+      setStatus('Shopping checklist saved on this device.', false)
+    },
+    [setStatus],
+  )
 
   const dayOrder = useMemo(() => weekdayOrder(firstDayIndex), [firstDayIndex])
 
@@ -235,6 +298,57 @@ export default function WeekPlanPage() {
           Clear week
         </button>
       </div>
+
+      <section className="shopping" aria-labelledby="shopping-list-heading">
+        <h2 id="shopping-list-heading">Weekly shopping list</h2>
+        {shoppingEntries.length === 0 ? (
+          <p className="ingredients-empty">
+            Pick recipes to generate your shopping overview.
+          </p>
+        ) : (
+          <ul className="shopping-list">
+            {shoppingEntries.map((entry) => {
+              const state = plan.shopping[entry.key] ?? {
+                inStock: false,
+                inBasket: false,
+              }
+              return (
+                <li key={entry.key} className="shopping-item">
+                  <div className="shopping-item__line">
+                    <span>{entry.line}</span>
+                    {entry.uses > 1 ? (
+                      <span className="shopping-item__uses">
+                        Used {entry.uses} times
+                      </span>
+                    ) : null}
+                  </div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={state.inStock}
+                      onChange={(e) =>
+                        handleShoppingToggle(entry.key, 'inStock', e.target.checked)
+                      }
+                    />{' '}
+                    In stock
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={state.inBasket}
+                      onChange={(e) =>
+                        handleShoppingToggle(entry.key, 'inBasket', e.target.checked)
+                      }
+                    />{' '}
+                    In basket
+                  </label>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
       <p
         className={`status${statusIsError ? ' error' : ''}`}
         aria-live="polite"
